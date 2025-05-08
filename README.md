@@ -1,38 +1,66 @@
-# 🚀 TELEDOWNLOAD  
-**🔧 Create by WR JUNIOR**
+# 📺 TeleVid - Telegram Video Downloader
 
-TELEDOWNLOAD adalah alat berbasis Python yang memungkinkan kamu untuk **mengunduh media spesifik (seperti .mp4, .pdf, .doc, .jpeg, dll)** dari channel Telegram dengan mudah dan cepat.  
-Dengan antarmuka terminal yang interaktif dan mendukung pemilihan folder penyimpanan, aplikasi ini sangat cocok digunakan untuk backup media pribadi dari channel Telegram.
+![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20Windows%20%7C%20WSL-lightgrey)
 
----
-
-## 🧰 Fitur Unggulan
-- ✅ Login ke Telegram dengan aman
-- 📜 Tampilkan daftar channel/obrolan (10 per halaman)
-- 🎯 Pilih ekstensi file tertentu yang ingin diunduh (.mp4, .pdf, dll)
-- 🗂 Tentukan folder tujuan penyimpanan file
-- 🔢 Atur jumlah file & urutan unduhan
-- 🔄 Resume otomatis jika file sudah ada
-- 🔁 Fitur reset session (login akun lain)
-- 💬 Dukungan antarmuka ASCII Art
+> 🔥 **TeleVid** adalah alat downloader video dari channel Telegram, dengan fitur lanjutan seperti pemilihan durasi minimum video, resume download otomatis, urutan mulai, dan jeda otomatis. Semua dirancang untuk mendukung efisiensi dan stabilitas saat mengunduh ratusan video.
 
 ---
 
-## ⚙️ Instalasi
+## 🚀 Fitur Unggulan
 
-### 1. Clone Repositori
+✅ Hanya mendownload **video**, bukan gambar atau dokumen lain  
+✅ Filter berdasarkan **durasi minimum video** (misalnya hanya video di atas 5 menit)  
+✅ Tentukan **jumlah video** yang ingin diunduh  
+✅ Tentukan **urutan keberapa** video dimulai  
+✅ Otomatis **melanjutkan unduhan** jika sebelumnya terputus  
+✅ Terdapat sistem **file sementara (.part)** untuk mendeteksi file yang belum selesai  
+✅ **Jeda otomatis** setiap 20 video selama 60 detik untuk menghindari pembatasan Telegram  
+✅ Opsi **reset session** jika ingin login ulang  
+✅ GUI untuk memilih folder download (dengan `Tkinter`)  
+✅ Tampilan **progress bar** dengan kecepatan real-time
 
-```bash
-git clone https://github.com/USERNAME/teledownload.git
-cd teledownload
+---
+
+## 💻 Cara Installasi
+
+1. **Clone repositori ini**:
+   ```bash
+   git clone https://github.com/kamu/televid.git
+   cd televid
+
+Buat virtual environment (opsional tapi disarankan):
 
 python3 -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
+source venv/bin/activate  # untuk Linux/macOS
+venv\Scripts\activate     # untuk Windows
+Install dependensi:
 pip install -r requirements.txt
 
-API_ID=YOUR_API_ID
-API_HASH=YOUR_API_HASH
-SESSION_NAME=teledownload
+Buat file .env di direktori utama dan isi dengan API Telegram kamu:
 
-python3 telegram_media_downloader.py/
+API_ID=123456
+API_HASH=abcdef1234567890abcdef1234567890
+SESSION_NAME=televid
+Jalankan script:
+
+python televid.py
+
+
+
+❓ FAQ
+Q: Apakah hanya bisa digunakan untuk video?
+✅ Ya, hanya file video Telegram (bukan gambar, dokumen, atau voice note).
+
+Q: Apakah bisa resume download jika sebelumnya terputus?
+✅ Ya, selama file .part masih ada, program akan melanjutkan unduhan sebelumnya.
+
+Q: Apakah bisa digunakan di Windows, Linux, atau WSL?
+✅ Bisa digunakan di semua OS yang mendukung Python dan Telegram API.
+
+🛡️ License
+MIT License — bebas digunakan untuk keperluan pribadi maupun komersial.
+
+✨ Kontribusi
+Pull Request dan saran sangat terbuka. Silakan fork dan submit perbaikan jika menemukan bug atau punya ide fitur baru!
