@@ -10,7 +10,7 @@
 
 ## 🚀 Fitur Unggulan
 
-✅ Hanya mendownload **video**, bukan gambar atau dokumen lain  
+✅ Hanya mendownload **video & Gambar**, bukan dokumen lain  
 ✅ Filter berdasarkan **durasi minimum video** (misalnya hanya video di atas 5 menit)  
 ✅ Tentukan **jumlah video** yang ingin diunduh  
 ✅ Tentukan **urutan keberapa** video dimulai  
