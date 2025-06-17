@@ -21,7 +21,7 @@ print("""
    $$ |   $$  __|   $$ |      $$  __|   $$ |  $$ |$$ |  $$ |$$$$  _$$$$ |$$ \$$$$ |$$ |     $$ |  $$ |$$  __$$ |$$ |  $$ |
    $$ |   $$ |      $$ |      $$ |      $$ |  $$ |$$ |  $$ |$$$  / \$$$ |$$ |\$$$ |$$ |     $$ |  $$ |$$ |  $$ |$$ |  $$ |
    $$ |   $$$$$$$$\ $$$$$$$$\ $$$$$$$$\ $$$$$$$  | $$$$$$  |$$  /   \$$ |$$ | \$$ |$$$$$$$$\ $$$$$$  |$$ |  $$ |$$$$$$$  |
-   \__|   \________|\________|\________|\_______/  \______/ \__/     \__|\__|  \__|\________|\______/ \__|  \__|\_______/                                                                                              
+   \__|   \________|\________|\________|\_______/  \______/ \__/     \__|\__|  \__|\________|\______/ \__|  \__|\_______/                                                                                             
 """)
 
 # Reset session jika diminta
@@ -32,6 +32,7 @@ if os.path.exists(f"{session_name}.session"):
         print("✅ Session berhasil dihapus. Silakan login ulang nanti.\n")
 
 # Fungsi pilih folder
+
 def pilih_folder():
     folder = input("Masukkan path folder tujuan untuk menyimpan file: ").strip()
     if os.path.isdir(folder):
@@ -40,13 +41,17 @@ def pilih_folder():
         print("❌ Folder tidak valid.")
         return None
 
-# Update progress bar
-def update_progress(downloaded, total, pbar, start_time):
-    elapsed = time.time() - start_time
+# Update progress bar seperti docker pull
+
+def format_bar(filename, downloaded, total, speed):
     percent = (downloaded / total) * 100 if total else 0
-    pbar.update(percent - pbar.n)
-    speed = downloaded / 1024 / 1024 / elapsed if elapsed > 0 else 0
-    pbar.set_postfix_str(f"Kecepatan: {speed:.2f} MB/s")
+    bar_length = 50
+    filled_length = int(bar_length * percent / 100)
+    bar = '▕' + '█' * filled_length + ' ' * (bar_length - filled_length) + '▏'
+    human_downloaded = f"{downloaded / (1024 * 1024):.1f} MB"
+    human_total = f"{total / (1024 * 1024):.1f} MB"
+    speed_str = f"{speed:.1f} MB/s"
+    return f"{filename}: {percent:>5.1f}% {bar} {human_downloaded}/{human_total} {speed_str}"
 
 # Fungsi utama
 async def download_video():
@@ -75,6 +80,9 @@ async def download_video():
             print("❌ Input tidak valid.")
             return
         start_index = int(start_index)
+
+        jumlah_input = input("Berapa video yang ingin diunduh? (contoh: 10 atau 'all'): ").strip().lower()
+        jumlah = int(jumlah_input) if jumlah_input.isdigit() else None
 
         folder = pilih_folder()
         if not folder:
@@ -105,8 +113,8 @@ async def download_video():
             print("❌ Tidak ada video ditemukan. Program berhenti.")
             return
 
-        jumlah_input = input("Berapa video yang ingin diunduh? (contoh: 10 atau 'all'): ").strip().lower()
-        jumlah = int(jumlah_input) if jumlah_input.isdigit() else total_video
+        if jumlah is None:
+            jumlah = total_video
 
         messages = messages[start_index - 1 : start_index - 1 + jumlah]
         print(f"▶️ Jumlah video yang akan diunduh: {len(messages)}")
@@ -127,14 +135,25 @@ async def download_video():
             print(f"⬇️  Mengunduh {filename}...")
             try:
                 start_time = time.time()
-                with tqdm(total=100, desc=filename, unit='%', ncols=100) as pbar:
-                    await client.download_media(
-                        msg,
-                        file=temp_path,
-                        progress_callback=lambda d, t: update_progress(d, t, pbar, start_time)
-                    )
+                last_print = 0
+
+                def progress_callback(downloaded, total):
+                    nonlocal last_print
+                    now = time.time()
+                    if now - last_print >= 0.5:
+                        elapsed = now - start_time
+                        speed = downloaded / 1024 / 1024 / elapsed if elapsed > 0 else 0
+                        output = format_bar(filename, downloaded, total, speed)
+                        print("\r" + output, end="", flush=True)
+                        last_print = now
+
+                await client.download_media(
+                    msg,
+                    file=temp_path,
+                    progress_callback=progress_callback
+                )
                 os.rename(temp_path, path)
-                print(f"✅ Selesai: {filename}\n")
+                print(f"\n✅ Selesai: {filename}\n")
             except Exception as e:
                 print(f"❌ Gagal: {e}")
 
