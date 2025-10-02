@@ -1,8 +1,2 @@
-telethon
-python-dotenv
-tqdm
-tk
-<<<<<<< HEAD
-=======
-
->>>>>>> 6463e8964eaa8fe8735f81e525d44df7d6fcafe7
+telethon>=1.36.0
+python-dotenv>=1.0.1
