@@ -34,28 +34,33 @@ class TeleVidApp:
         frm.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
 
         # List chat
-        tk.Label(frm, text="Pilih Group / Channel / Chat:", bg="white").grid(row=0, column=0, sticky="w", padx=10, pady=5)
+        tk.Label(frm, text="Pilih Group / Channel / Chat:", bg="white").grid(
+            row=0, column=0, sticky="w", padx=10, pady=5)
         self.listbox = tk.Listbox(frm, height=12, bg="#fafafa",
                                   selectbackground="#4CAF50", font=("Consolas", 10))
-        self.listbox.grid(row=1, column=0, columnspan=2, padx=10, pady=5, sticky="nsew")
+        self.listbox.grid(row=1, column=0, columnspan=2,
+                          padx=10, pady=5, sticky="nsew")
         sb = tk.Scrollbar(frm, orient="vertical", command=self.listbox.yview)
         sb.grid(row=1, column=2, sticky="ns", padx=(0, 10), pady=5)
         self.listbox.config(yscrollcommand=sb.set)
 
-        # Filter durasi
-        tk.Label(frm, text="Filter durasi video (detik) ≤", bg="white").grid(row=2, column=0, sticky="w", padx=10, pady=5)
+        # Filter durasi (minimal)
+        tk.Label(frm, text="Filter durasi video minimal (detik) ≥",
+                 bg="white").grid(row=2, column=0, sticky="w", padx=10, pady=5)
         self.ent_durasi = tk.Entry(frm, width=10)
-        self.ent_durasi.insert(0, "60")
+        self.ent_durasi.insert(0, "240")
         self.ent_durasi.grid(row=2, column=1, sticky="w", padx=10, pady=5)
 
         # Start index
-        tk.Label(frm, text="Mulai dari urutan ke-", bg="white").grid(row=3, column=0, sticky="w", padx=10, pady=5)
+        tk.Label(frm, text="Mulai dari urutan ke-", bg="white").grid(
+            row=3, column=0, sticky="w", padx=10, pady=5)
         self.ent_start = tk.Entry(frm, width=10)
         self.ent_start.insert(0, "1")
         self.ent_start.grid(row=3, column=1, sticky="w", padx=10, pady=5)
 
         # Folder
-        tk.Label(frm, text="Lokasi download:", bg="white").grid(row=4, column=0, sticky="w", padx=10, pady=5)
+        tk.Label(frm, text="Lokasi download:", bg="white").grid(
+            row=4, column=0, sticky="w", padx=10, pady=5)
         self.folder_var = tk.StringVar()
         self.ent_folder = tk.Entry(frm, textvariable=self.folder_var, width=40)
         self.ent_folder.grid(row=4, column=1, sticky="w", padx=10, pady=5)
@@ -68,15 +73,19 @@ class TeleVidApp:
             .grid(row=5, column=0, columnspan=3, pady=15)
 
         # Status singkat
-        self.lbl_status = tk.Label(frm, text="Status: Idle", bg="white", fg="#555")
+        self.lbl_status = tk.Label(
+            frm, text="Status: Idle", bg="white", fg="#555")
         self.lbl_status.grid(row=6, column=0, columnspan=3, pady=5)
 
         # Area log dengan Scroll
-        self.txt_log = scrolledtext.ScrolledText(frm, height=20, bg="#111", fg="#0f0", font=("Consolas", 10))
-        self.txt_log.grid(row=7, column=0, columnspan=3, padx=10, pady=10, sticky="nsew")
+        self.txt_log = scrolledtext.ScrolledText(
+            frm, height=20, bg="#111", fg="#0f0", font=("Consolas", 10))
+        self.txt_log.grid(row=7, column=0, columnspan=3,
+                          padx=10, pady=10, sticky="nsew")
 
         # Progress bar indeterminate
-        self.progress = ttk.Progressbar(frm, orient="horizontal", mode="indeterminate", length=600)
+        self.progress = ttk.Progressbar(
+            frm, orient="horizontal", mode="indeterminate", length=600)
         self.progress.grid(row=8, column=0, columnspan=3, pady=10)
 
         # Data dialog
@@ -84,9 +93,11 @@ class TeleVidApp:
 
         # Loop khusus Telethon
         self.loop = asyncio.new_event_loop()
-        self.loop_thread = threading.Thread(target=self.loop.run_forever, daemon=True)
+        self.loop_thread = threading.Thread(
+            target=self.loop.run_forever, daemon=True)
         self.loop_thread.start()
-        self.client = TelegramClient(SESSION_NAME, API_ID, API_HASH, loop=self.loop)
+        self.client = TelegramClient(
+            SESSION_NAME, API_ID, API_HASH, loop=self.loop)
 
         # Load chat
         self.run_async(self._load_dialogs())
@@ -116,6 +127,16 @@ class TeleVidApp:
     def run_async(self, coro):
         return asyncio.run_coroutine_threadsafe(coro, self.loop)
 
+    # --- update progress di 1 baris ---
+    def update_progress_line(self, text):
+        self.ui_call(self._replace_last_line, text)
+
+    def _replace_last_line(self, text):
+        # hapus baris terakhir, lalu ganti dengan progress terbaru
+        self.txt_log.delete("end-2l", "end-1l")
+        self.txt_log.insert("end-1l", text + "\n")
+        self.txt_log.see(tk.END)
+
     # ---------- Load dialogs ----------
     async def _load_dialogs(self):
         await self.client.start()
@@ -140,10 +161,11 @@ class TeleVidApp:
             messagebox.showwarning("Warning", "Pilih chat dulu")
             return
         try:
-            max_dur = int(self.ent_durasi.get())
+            min_dur = int(self.ent_durasi.get())
             start_from = int(self.ent_start.get())
         except ValueError:
-            messagebox.showwarning("Warning", "Durasi dan urutan harus angka")
+            messagebox.showwarning(
+                "Warning", "Durasi dan urutan harus angka")
             return
         folder = self.folder_var.get().strip()
         if not folder:
@@ -153,7 +175,8 @@ class TeleVidApp:
         entity = self.dialog_entities[sel[0]]
         self.set_status("Status: Mulai download…")
         self.progress_start()
-        self.run_async(self._download_videos(entity, max_dur, start_from, folder))
+        self.run_async(self._download_videos(
+            entity, min_dur, start_from, folder))
 
     def _get_video_duration(self, msg):
         if not msg.video:
@@ -164,7 +187,7 @@ class TeleVidApp:
         return None
 
     # ---------- Download ----------
-    async def _download_videos(self, entity, max_duration_sec, start_from_index, folder):
+    async def _download_videos(self, entity, min_duration_sec, start_from_index, folder):
         await self.client.start()
         matched_index = 0
         downloaded = 0
@@ -174,7 +197,7 @@ class TeleVidApp:
             if not msg.video:
                 continue
             dur = self._get_video_duration(msg)
-            if dur is None or dur > max_duration_sec:
+            if dur is None or dur < min_duration_sec:
                 continue
             matched_index += 1
             if matched_index < start_from_index:
@@ -184,10 +207,11 @@ class TeleVidApp:
             path = os.path.join(folder, filename)
 
             # Log awal
-            self.log_message(f"\n▶️ Memulai pengunduhan video ke-{matched_index}")
+            self.log_message(
+                f"\n▶️ Memulai pengunduhan video ke-{matched_index}")
             self.log_message(f"   Mengunduh {filename}...")
 
-            # Progress callback
+            # Progress callback (satu baris saja)
             def progress_callback(received, total):
                 if total == 0:
                     return
@@ -205,7 +229,11 @@ class TeleVidApp:
                 mb_done = received / (1024*1024)
                 mb_total = total / (1024*1024)
                 spd = f"{speed/1024:.1f} KB/s" if speed < 1024*1024 else f"{speed/1024/1024:.1f} MB/s"
-                self.log_message(f"   [{bar}] {percent:3.0f}% {mb_done:.1f}MB/{mb_total:.1f}MB {spd}")
+
+                # ✅ Progress update overwrite baris terakhir
+                self.update_progress_line(
+                    f"🚀 {percent:3.0f}% [{bar}] {mb_done:.1f}/{mb_total:.1f} MB | {spd}"
+                )
 
             # Download
             await msg.download_media(file=path, progress_callback=progress_callback)
@@ -213,7 +241,8 @@ class TeleVidApp:
 
             downloaded += 1
             if downloaded % BATCH_SIZE == 0:
-                self.log_message(f"⏸️ Istirahat {BATCH_PAUSE_SEC} detik...")
+                self.log_message(
+                    f"⏸️ Istirahat {BATCH_PAUSE_SEC} detik...")
                 await asyncio.sleep(BATCH_PAUSE_SEC)
 
         self.progress_stop()
@@ -239,6 +268,7 @@ def main():
     root = tk.Tk()
     TeleVidApp(root)
     root.mainloop()
+
 
 if __name__ == "__main__":
     main()
